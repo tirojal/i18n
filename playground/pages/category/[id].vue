@@ -18,7 +18,7 @@ definePageMeta({
 
 <template>
   <div>
-    <p>This is cateory page on '{{ route.params.id }}'</p>
+    <p>This is category page on '{{ route.params.id }}'</p>
     <nav>
       <span v-for="locale in availableLocales" :key="locale.code">
         <NuxtLink :to="switchLocalePath(locale.code) || ''">{{ locale.name }}</NuxtLink> |

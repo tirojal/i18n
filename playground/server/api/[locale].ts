@@ -22,7 +22,10 @@ const locales: LocaleMessages<DefineLocaleMessage> = {
       }
     },
     welcome: 'ようこそ',
-    hello: 'こんにちは {name} ！'
+    hello: 'こんにちは {name} ！',
+    settings: {
+      profile: 'プロフィール'
+    }
   }
 }
 

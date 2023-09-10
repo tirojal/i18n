@@ -10,5 +10,8 @@
   },
   "welcome": "Bienvenue",
   "hello": "Bonjour {name} !",
-  "items": []
+  "items": [],
+  "settings": {
+    "profile": "Profil"
+  }
 }

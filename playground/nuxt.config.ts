@@ -1,6 +1,7 @@
 import Module1 from './module1'
 import LayerModule from './layer-module'
 import ModuleExperimental from './module-experimental'
+import InjectPagesModule from './modules/inject-pages/inject-pages-module'
 import type { NuxtApp } from 'nuxt/dist/app/index'
 
 // https://nuxt.com/docs/guide/directory-structure/nuxt.config
@@ -13,6 +14,7 @@ export default defineNuxtConfig({
     Module1,
     ModuleExperimental,
     LayerModule,
+    InjectPagesModule,
     /*
     [
       '@nuxtjs/i18n',
@@ -154,10 +156,10 @@ export default defineNuxtConfig({
     //   runtimeOnly: true
     // },
     // trailingSlash: true,
-    debug: true,
+    debug: false,
     defaultLocale: 'en',
     // strategy: 'no_prefix',
-    // strategy: 'prefix',
+    strategy: 'prefix',
     // strategy: 'prefix_and_default',
     // strategy: 'prefix_except_default',
     // rootRedirect: '/ja/about-ja',
@@ -168,7 +170,30 @@ export default defineNuxtConfig({
         ja: '/history-ja'
       },
       about: {
+        en: '/about-en',
         ja: '/about-ja'
+      },
+      'category/[id]': {
+        en: '/category-en/[id]',
+        ja: '/category-ja/[id]',
+        fr: '/category-fr/[id]',
+        de: '/category-de/[id]',
+        nl: '/category-nl/[id]'
+      },
+      // injected/[param]: {
+      //   ja: '/injected-ja',
+      //   fr: '/injected-fr'
+      // }
+      // 'injected/:param': {
+      // ja: '/injected-ja'
+      //   fr: '/injected-fr'
+      // }
+      'optional/[[opt1]]': {
+        en: '/optional-en/[[opt1]]',
+        ja: '/optional-ja/[[opt1]]',
+        fr: '/optional-fr/[[opt1]]',
+        de: '/optional-de/[[opt1]]',
+        nl: '/optional-nl/[[opt1]]'
       }
     },
     // differentDomains: true,

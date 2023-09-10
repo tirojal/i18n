@@ -1,6 +1,6 @@
 import createDebug from 'debug'
 import { extendPages } from '@nuxt/kit'
-import { I18nRoute, localizeRoutes, DefaultLocalizeRoutesPrefixable } from 'vue-i18n-routing'
+import { I18nRoute as vueI18nRoute, localizeRoutes, DefaultLocalizeRoutesPrefixable } from 'vue-i18n-routing'
 import { isString } from '@intlify/shared'
 import { parse as parseSFC, compileScript } from '@vue/compiler-sfc'
 import { walk } from 'estree-walker'
@@ -16,6 +16,16 @@ import type { NuxtI18nOptions, CustomRoutePages } from './types'
 import type { Node, ObjectExpression, ArrayExpression } from '@babel/types'
 
 const debug = createDebug('@nuxtjs/i18n:pages')
+
+type I18nRouteExtension = {
+  pageMeta?: AnalyzedNuxtPageMeta
+  resolvedPageOptions?: object
+  pageOptions?: object
+}
+
+type I18nRoute = vueI18nRoute & {
+  i18n?: I18nRouteExtension
+}
 
 export type AnalyzedNuxtPageMeta = {
   inRoot: boolean
@@ -73,8 +83,11 @@ export function setupPages(
       localizeRoutesPrefixable,
       optionsResolver: getRouteOptionsResolver(ctx, options)
     })
+
     pages.splice(0, pages.length)
+
     pages.unshift(...(localizedPages as NuxtPage[]))
+
     debug('... made pages', pages)
   })
 }
@@ -154,17 +167,26 @@ function getRouteOptionsFromPages(
   }
 
   // get `AnalyzedNuxtPageMeta` to use Vue Router path mapping
-  const pageMeta = ctx.pages.get(route as unknown as NuxtPage)
+  let pageMeta = ctx.pages.get(route as unknown as NuxtPage)
+
+  // fallback from route itself
+  if (pageMeta == null && route.i18n && route.i18n.pageMeta) {
+    pageMeta = route.i18n.pageMeta
+  }
 
   // skip if no `AnalyzedNuxtPageMeta`
-  if (pageMeta == null) {
+  if (pageMeta == null && !(route.i18n && (route.i18n.pageMeta || route.i18n.resolvedPageOptions))) {
     console.warn(
       formatMessage(`Couldn't find AnalyzedNuxtPageMeta by NuxtPage (${route.path}), so no custom route for it`)
     )
     return options
   }
 
-  const pageOptions = pageMeta.path ? pages[pageMeta.path] : undefined
+  let pageOptions = pageMeta?.path ? pages[pageMeta.path] : undefined
+
+  if (pageOptions === undefined && route.i18n && route.i18n.pageOptions) {
+    pageOptions = route.i18n.pageOptions
+  }
 
   // routing disabled
   if (pageOptions === false) {
@@ -172,12 +194,34 @@ function getRouteOptionsFromPages(
   }
 
   // skip if no page options defined
-  if (!pageOptions) {
+  if (!pageOptions && (!route.i18n || !route.i18n.resolvedPageOptions)) {
     return options
   }
 
-  // remove disabled locales from page options
-  options.locales = options.locales.filter(locale => pageOptions[locale] !== false)
+  if (pageOptions) {
+    // remove disabled locales from page options
+    options.locales = options.locales.filter(locale => pageOptions[locale] !== false)
+  } else if (route?.i18n?.resolvedPageOptions) {
+    options.locales = options.locales.filter(locale => route.i18n.resolvedPageOptions[locale] !== false)
+  }
+
+  if (route?.i18n?.resolvedPageOptions) {
+    for (const locale of options.locales) {
+      const customLocalePath = route.i18n.resolvedPageOptions[locale]
+      if (isString(customLocalePath)) {
+        // set custom path if any
+        options.paths[locale] = customLocalePath
+        continue
+      }
+
+      const customDefaultLocalePath = route.i18n.resolvedPageOptions[defaultLocale]
+      if (isString(customDefaultLocalePath)) {
+        // set default locale's custom path if any
+        options.paths[locale] = customDefaultLocalePath
+      }
+    }
+    return options
+  }
 
   // construct paths object
   for (const locale of options.locales) {

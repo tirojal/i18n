@@ -1,3 +1,6 @@
 {
-  "moduleLayerText": "This is a merged module layer locale key in Dutch"
+  "moduleLayerText": "This is a merged module layer locale key in Dutch",
+  "settings": {
+    "profile": "Profiel"
+  }
 }

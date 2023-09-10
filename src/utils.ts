@@ -352,7 +352,7 @@ export function parseSegment(segment: string) {
         if (c === '[' && state === SegmentParserState.dynamic) {
           state = SegmentParserState.optional
         }
-        if (c === ']' && (state !== SegmentParserState.optional || buffer[buffer.length - 1] === ']')) {
+        if (c === ']' && (state !== SegmentParserState.optional || segment[i - 1] === ']')) {
           if (!buffer) {
             throw new Error('Empty param')
           } else {

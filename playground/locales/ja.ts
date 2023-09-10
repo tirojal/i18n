@@ -10,6 +10,9 @@ export default defineI18nLocale(locale => {
       }
     },
     welcome: 'ようこそ',
-    hello: 'こんにちは {name} ！'
+    hello: 'こんにちは {name} ！',
+    settings: {
+      profile: 'プロフィール'
+    }
   }
 })
